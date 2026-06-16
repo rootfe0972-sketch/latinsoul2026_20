@@ -33,11 +33,6 @@ input[type=text]::placeholder{color:#6b5f72;}
 .row2 select{flex:1;padding:13px;border-radius:10px;border:1px solid var(--line);
   background:var(--card2);color:var(--txt);font-size:14px;}
 .price{font-size:22px;font-weight:800;margin-top:12px;}
-.toggles{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-.chip{background:var(--chip);border:1px solid var(--line);color:var(--sub);
-  font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer;user-select:none;transition:.15s;}
-.chip.on{background:var(--chipon);color:#fff;border-color:var(--chipon);}
-.chip.disabled{opacity:.35;cursor:not-allowed;}
 .global-opts{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px;}
 .opt{display:flex;align-items:center;justify-content:space-between;
   background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;}
@@ -114,7 +109,8 @@ const NUM_SUBJECTS = 3;
 
 let CONFIG = null;
 const state = {
-  subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:'', staff:false, parent:false})),
+  subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:''})),
+  staff:false, parent:false,            // 공통: 운영진 / 엄빠
   pre:false, event:false, review:false, female11:false
 };
 
@@ -137,7 +133,6 @@ function genres(){ return [...new Set(CONFIG.classes.map(c=>c.genre))]; }
 function classesOf(g){ return CONFIG.classes.filter(c=>c.genre===g); }
 function findClass(g,n){ return CONFIG.classes.find(c=>c.genre===g && c.name===n); }
 
-/* 사전할인 활성 여부 (마감일 이내) */
 function preActive(){
   if(!CONFIG.settings.preDeadline) return false;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -173,19 +168,14 @@ function renderSubjects(){
       sub.genre ? classesOf(sub.genre).map(c=>`<option value="${c.name}" ${sub.cls===c.name?'selected':''}>${c.name} (${fmt(c.fee)}) · ${c.time}</option>`) : []
     ).join('');
     const cl = sub.genre&&sub.cls ? findClass(sub.genre,sub.cls) : null;
-    const price = cl ? subjectPrice(sub, cl).net : 0;
-    const parentDisabled = cl && cl.parentRate<=0;
+    const price = cl ? subjectNet(cl) : 0;
     div.innerHTML = `
       <span class="badge">과목 ${i+1}</span>
       <div class="row2">
         <select data-i="${i}" data-k="genre">${gOpts}</select>
         <select data-i="${i}" data-k="cls">${cOpts}</select>
       </div>
-      <div class="price">${fmt(price)}</div>
-      <div class="toggles">
-        <span class="chip ${sub.staff?'on':''}" data-i="${i}" data-t="staff">운영진</span>
-        <span class="chip ${sub.parent?'on':''} ${parentDisabled?'disabled':''}" data-i="${i}" data-t="parent">엄빠</span>
-      </div>`;
+      <div class="price">${fmt(price)}</div>`;
     box.appendChild(div);
   });
   box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
@@ -194,19 +184,13 @@ function renderSubjects(){
     if(k==='genre') state.subjects[i].cls='';
     render();
   }));
-  box.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',e=>{
-    if(e.target.classList.contains('disabled')) return;
-    const i=+e.target.dataset.i, t=e.target.dataset.t;
-    state.subjects[i][t] = !state.subjects[i][t];
-    if(t==='staff' && state.subjects[i].staff) state.subjects[i].parent=false;
-    if(t==='parent' && state.subjects[i].parent) state.subjects[i].staff=false;
-    render();
-  }));
 }
 
 function renderGlobal(){
   const pre = preActive();
   const opts = [
+    {k:'staff', t:'운영진 할인 (전 과목 무료)', d:'다른 할인과 중복 적용 안 됨'},
+    {k:'parent', t:'엄빠 할인 (전 과목 50%)', d:'공연준비반 제외 · 다른 할인과 중복 안 됨'},
     {k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
     {k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
     {k:'review', t:`수업후기 할인 (과목당 ${fmt(CONFIG.settings.reviewAmount)})`, d:'이전 차수 강습 후기 작성자'},
@@ -218,44 +202,36 @@ function renderGlobal(){
     return `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
       <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
   }).join('');
-  box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',e=>{
-    const k=o.dataset.k; state[k]=!state[k]; render();
+  box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+    const k=o.dataset.k;
+    state[k]=!state[k];
+    // 운영진/엄빠 상호 배타
+    if(k==='staff' && state.staff) state.parent=false;
+    if(k==='parent' && state.parent) state.staff=false;
+    render();
   }));
 }
 
-/* ---------- 과목별 단가 계산 ----------
-   운영진(100%)/엄빠(50%)는 중복불가 & 다른할인 무시.
-   그 외엔 정가 - 사전(과목당) 적용. */
-function subjectPrice(sub, cl){
-  if(!cl) return {fee:0, net:0, label:'', staffOff:0, parentOff:0, preOff:0};
-  const fee = cl.fee;
-  if(sub.staff && cl.staffRate>0){
-    const off = Math.round(fee*cl.staffRate/100);
-    return {fee, net:fee-off, label:'운영진', staffOff:off, parentOff:0, preOff:0};
-  }
-  if(sub.parent && cl.parentRate>0){
-    const off = Math.round(fee*cl.parentRate/100);
-    return {fee, net:fee-off, label:'엄빠', staffOff:0, parentOff:off, preOff:0};
-  }
-  // 일반: 사전할인만 과목 단가에서 차감
-  let preOff = 0;
-  if(state.pre && preActive() && cl.preDiscount>0) preOff = cl.preDiscount;
-  return {fee, net:fee-preOff, label:'', staffOff:0, parentOff:0, preOff};
+/* ---------- 과목 단가(표시용): 운영진/엄빠 우선, 아니면 사전 차감 ---------- */
+function subjectNet(cl){
+  if(!cl) return 0;
+  if(state.staff && cl.staffRate>0) return cl.fee - Math.round(cl.fee*cl.staffRate/100);
+  if(state.parent && cl.parentRate>0) return cl.fee - Math.round(cl.fee*cl.parentRate/100);
+  let net = cl.fee;
+  if(state.pre && preActive() && cl.preDiscount>0) net -= cl.preDiscount;
+  return net;
 }
 
-/* 한 과목이 "일반"(운영진/엄빠 미적용) 인지 */
-function isPlain(sub, cl){ 
-  return !(sub.staff && cl.staffRate>0) && !(sub.parent && cl.parentRate>0);
-}
+/* 운영진/엄빠가 "실제로" 걸리는 과목인지 (엄빠는 공연준비반=parentRate 0 이면 제외) */
+function staffApplies(cl){ return state.staff && cl.staffRate>0; }
+function parentApplies(cl){ return state.parent && cl.parentRate>0; }
 
 /* ---------- 패키지 자동 감지 ---------- */
 function detectPackages(chosenKeys){
   const have = (g,n)=> chosenKeys.some(k=>k.genre===g && k.cls===n);
-  const used = []; let total = 0; const labels=[];
+  let total=0; const labels=[];
   for(const p of CONFIG.packages){
-    if(p.need.every(([g,n])=>have(g,n))){
-      total += p.discount; labels.push(p.label);
-    }
+    if(p.need.every(([g,n])=>have(g,n))){ total += p.discount; labels.push(p.label); }
   }
   return {total, labels};
 }
@@ -267,41 +243,47 @@ function calc(){
     return cl ? {sub:s, cl} : null;
   }).filter(Boolean);
 
-  let subtotal=0, preTotal=0, staffTotal=0, parentTotal=0;
-  let plainCount=0;
-  chosen.forEach(({sub,cl})=>{
-    const p = subjectPrice(sub,cl);
-    subtotal += p.fee;
-    preTotal += p.preOff;
-    staffTotal += p.staffOff;
-    parentTotal += p.parentOff;
-    if(isPlain(sub,cl)) plainCount++;
+  let subtotal=0, staffTotal=0, parentTotal=0, preTotal=0, plainCount=0;
+  chosen.forEach(({cl})=>{
+    subtotal += cl.fee;
+    if(staffApplies(cl)){
+      staffTotal += Math.round(cl.fee*cl.staffRate/100);
+    } else if(parentApplies(cl)){
+      parentTotal += Math.round(cl.fee*cl.parentRate/100);
+    } else {
+      // 일반 과목: 사전할인 대상 + 후기/이벤트/1+1 대상
+      if(state.pre && preActive() && cl.preDiscount>0) preTotal += cl.preDiscount;
+      plainCount++;
+    }
   });
 
-  // 개편이벤트: 인당(=신청자 1명) 1회 차감
-  const eventOff = state.event ? CONFIG.settings.eventAmount : 0;
-  // 수업후기: 과목당 (일반 과목 대상)
-  const reviewOff = state.review ? plainCount * CONFIG.settings.reviewAmount : 0;
+  // 운영진/엄빠가 하나라도 켜져 있으면 다른 공통할인(이벤트/후기/1+1/패키지)·사전은 무시
+  const hardDiscount = (state.staff || state.parent);
 
-  // 여성 1+1: 살사/바차타 비기너 1과목 무료 (가장 저렴한 비기너 1개)
-  let female11Off = 0, female11Label='';
-  if(state.female11){
-    const beginners = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
-      .map(({sub,cl})=>subjectPrice(sub,cl).net).sort((a,b)=>a-b);
-    if(beginners.length){ female11Off = beginners[0]; female11Label='비기너 1+1 (1명 무료)'; }
+  const eventOff = (!hardDiscount && state.event) ? CONFIG.settings.eventAmount : 0;
+  const reviewOff = (!hardDiscount && state.review) ? plainCount * CONFIG.settings.reviewAmount : 0;
+
+  let female11Off=0, female11Label='';
+  if(!hardDiscount && state.female11){
+    const begs = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
+      .map(({cl})=> subjectNet(cl)).sort((a,b)=>a-b);
+    if(begs.length){ female11Off = begs[0]; female11Label='비기너 1+1 (1명 무료)'; }
   }
 
-  // 패키지 (사전할인과 중복 불가)
-  const chosenKeys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
-  const pkg = detectPackages(chosenKeys);
-  let pkgOff = pkg.total, pkgLabels = pkg.labels.slice();
-  if(pkgOff>0 && preTotal>0){
-    // 사전할인과 패키지 중 유리한 쪽
-    if(pkgOff >= preTotal){ preTotal=0; } else { pkgOff=0; pkgLabels=[]; }
+  let pkgOff=0, pkgLabels=[];
+  if(!hardDiscount){
+    const keys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
+    const pkg = detectPackages(keys);
+    pkgOff = pkg.total; pkgLabels = pkg.labels.slice();
+    if(pkgOff>0 && preTotal>0){            // 패키지 vs 사전 중복불가 → 유리한 쪽
+      if(pkgOff >= preTotal) preTotal=0; else { pkgOff=0; pkgLabels=[]; }
+    }
+  } else {
+    preTotal = 0; // 운영진/엄빠 시 사전할인도 무시
   }
 
-  const total = Math.max(0, subtotal - preTotal - staffTotal - parentTotal - eventOff - reviewOff - female11Off - pkgOff);
-  return {chosen, subtotal, preTotal, staffTotal, parentTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
+  const total = Math.max(0, subtotal - staffTotal - parentTotal - preTotal - eventOff - reviewOff - female11Off - pkgOff);
+  return {chosen, subtotal, staffTotal, parentTotal, preTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
 }
 
 /* ---------- 렌더 ---------- */
@@ -324,6 +306,10 @@ function render(){
     document.getElementById('breakdown').insertAdjacentHTML('beforeend',
       `<div class="note">✓ ${r.pkgLabels.join(', ')} 적용됨</div>`);
   }
+  if((state.staff||state.parent) && (state.event||state.review||state.female11||state.pre)){
+    document.getElementById('breakdown').insertAdjacentHTML('beforeend',
+      `<div class="note">※ 운영진/엄빠 할인은 다른 할인과 중복되지 않아 단독 적용됩니다.</div>`);
+  }
   const cf = conflicts();
   document.getElementById('conflictWarn').textContent = cf.length ? '⚠ 수업시간이 겹칩니다: '+cf.join(', ') : '';
 }
@@ -334,8 +320,9 @@ function save(){
   if(!nick){ toast('닉네임을 입력해주세요'); return; }
   const r = calc();
   if(!r.chosen.length){ toast('과목을 선택해주세요'); return; }
-  const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`+(sub.staff?'(운영진)':sub.parent?'(엄빠)':'')).join(', ');
+  const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
   const discs=[];
+  if(r.staffTotal)discs.push('운영진');if(r.parentTotal)discs.push('엄빠');
   if(r.preTotal)discs.push('사전');if(r.eventOff)discs.push('개편이벤트');if(r.reviewOff)discs.push('후기');
   if(r.female11Off)discs.push('1+1');if(r.pkgLabels.length)discs.push('패키지');
   const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
@@ -352,8 +339,8 @@ function toast(msg){
 }
 
 function reset(){
-  state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:'',staff:false,parent:false}));
-  state.pre=false; state.event=false; state.review=false; state.female11=false;
+  state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:''}));
+  state.staff=false; state.parent=false; state.pre=false; state.event=false; state.review=false; state.female11=false;
   document.getElementById('nickname').value='';
   render();
 }
