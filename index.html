@@ -7,35 +7,35 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
-  --bg:#120a14; --card:#1e1320; --card2:#271828; --line:#3a2740;
-  --txt:#f3eef5; --sub:#a99fb0; --accent:#ff5a3c; --accent2:#ff8a3c;
-  --ok:#37d67a; --chip:#2c1d30; --chipon:#ff5a3c;
+--bg:#120a14; --card:#1e1320; --card2:#271828; --line:#3a2740;
+--txt:#f3eef5; --sub:#a99fb0; --accent:#ff5a3c; --accent2:#ff8a3c;
+--ok:#37d67a; --chip:#2c1d30; --chipon:#ff5a3c;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;}
 body{background:var(--bg);color:var(--txt);line-height:1.5;}
 .header{background:linear-gradient(160deg,#2a0f2e 0%,#3a1230 45%,#1a0a1c 100%);
-  padding:32px 16px 28px;text-align:center;border-bottom:1px solid var(--line);}
+padding:32px 16px 28px;text-align:center;border-bottom:1px solid var(--line);}
 .header h1{font-size:30px;font-weight:800;}
 .header h1 b{color:var(--accent);}
 .header p{color:var(--sub);font-size:14px;margin-top:6px;}
 .sync{display:inline-block;margin-top:10px;font-size:12px;color:var(--ok);
-  background:rgba(55,214,122,.12);padding:4px 12px;border-radius:20px;}
+background:rgba(55,214,122,.12);padding:4px 12px;border-radius:20px;}
 .sync.fail{color:#ff7676;background:rgba(255,118,118,.12);}
 .wrap{max-width:560px;margin:0 auto;padding:24px 16px 80px;}
 label.lbl{display:block;font-size:14px;font-weight:700;margin:18px 0 8px;}
 input[type=text]{width:100%;padding:14px;border-radius:10px;border:1px solid var(--line);
-  background:var(--card);color:var(--txt);font-size:15px;}
+background:var(--card);color:var(--txt);font-size:15px;}
 input[type=text]::placeholder{color:#6b5f72;}
 .subj{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
 .badge{display:inline-block;background:var(--accent);color:#fff;font-weight:700;font-size:13px;
-  padding:4px 12px;border-radius:8px;margin-bottom:12px;}
+padding:4px 12px;border-radius:8px;margin-bottom:12px;}
 .row2{display:flex;gap:10px;}
 .row2 select{flex:1;padding:13px;border-radius:10px;border:1px solid var(--line);
-  background:var(--card2);color:var(--txt);font-size:14px;}
+background:var(--card2);color:var(--txt);font-size:14px;}
 .price{font-size:22px;font-weight:800;margin-top:12px;}
 .global-opts{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px;}
 .opt{display:flex;align-items:center;justify-content:space-between;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;}
+background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;}
 .opt.on{border-color:var(--accent);background:var(--card2);}
 .opt .t{font-size:14px;font-weight:700;}
 .opt .d{font-size:12px;color:var(--sub);margin-top:2px;}
@@ -44,7 +44,7 @@ input[type=text]::placeholder{color:#6b5f72;}
 .opt .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
 .opt.on .sw::after{left:21px;}
 .note{font-size:12px;color:var(--accent2);background:rgba(255,138,60,.1);
-  border-radius:10px;padding:10px 12px;margin-top:10px;}
+border-radius:10px;padding:10px 12px;margin-top:10px;}
 .summary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px;}
 .summary h3{font-size:16px;margin-bottom:14px;}
 .sline{display:flex;justify-content:space-between;font-size:14px;color:var(--sub);margin:7px 0;}
@@ -60,11 +60,11 @@ input[type=text]::placeholder{color:#6b5f72;}
 .btn-reset{background:var(--card2);color:var(--sub);border:1px solid var(--line)!important;}
 .warn{color:#ff7676;font-size:12px;margin-top:8px;}
 .loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;z-index:99;gap:16px;}
+align-items:center;justify-content:center;z-index:99;gap:16px;}
 .spin{width:46px;height:46px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;
-  padding:12px 22px;border-radius:30px;font-size:14px;opacity:0;transition:.3s;z-index:100;}
+padding:12px 22px;border-radius:30px;font-size:14px;opacity:0;transition:.3s;z-index:100;}
 .toast.show{opacity:1;}
 </style>
 </head>
@@ -72,33 +72,33 @@ input[type=text]::placeholder{color:#6b5f72;}
 <div class="loading" id="loading"><div class="spin"></div><div id="loadtxt">어드민 설정 불러오는 중...</div></div>
 
 <div class="header">
-  <h1><b>수강료</b> 계산기 <span style="font-size:18px;color:var(--accent2)">3.0</span></h1>
-  <p>라틴소울 · 살사 & 바차타 20차수 수강료 자동 계산 & 기록</p>
-  <span class="sync" id="sync">동기화 중...</span>
+<h1><b>수강료</b> 계산기 <span style="font-size:18px;color:var(--accent2)">3.0</span></h1>
+<p>라틴소울 · 살사 & 바차타 20차수 수강료 자동 계산 & 기록</p>
+<span class="sync" id="sync">동기화 중...</span>
 </div>
 
 <div class="wrap">
-  <label class="lbl">닉네임</label>
-  <input type="text" id="nickname" placeholder="닉네임을 입력하세요">
+<label class="lbl">닉네임</label>
+<input type="text" id="nickname" placeholder="닉네임을 입력하세요">
 
-  <label class="lbl">과목 선택</label>
-  <div id="subjects"></div>
+<label class="lbl">과목 선택</label>
+<div id="subjects"></div>
 
-  <label class="lbl">공통 할인 / 이벤트</label>
-  <div class="global-opts" id="globalOpts"></div>
+<label class="lbl">공통 할인 / 이벤트</label>
+<div class="global-opts" id="globalOpts"></div>
 
-  <div class="summary">
-    <h3>계산 내역</h3>
-    <div id="breakdown"></div>
-    <div class="hr"></div>
-    <div class="total"><span class="lab">최종 합계</span><span class="val" id="grandTotal">0원</span></div>
-    <div id="conflictWarn" class="warn"></div>
-  </div>
+<div class="summary">
+<h3>계산 내역</h3>
+<div id="breakdown"></div>
+<div class="hr"></div>
+<div class="total"><span class="lab">최종 합계</span><span class="val" id="grandTotal">0원</span></div>
+<div id="conflictWarn" class="warn"></div>
+</div>
 
-  <div class="btns">
-    <button class="btn-save" id="saveBtn">기록 저장</button>
-    <button class="btn-reset" id="resetBtn">초기화</button>
-  </div>
+<div class="btns">
+<button class="btn-save" id="saveBtn">기록 저장</button>
+<button class="btn-reset" id="resetBtn">초기화</button>
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -109,24 +109,24 @@ const NUM_SUBJECTS = 3;
 
 let CONFIG = null;
 const state = {
-  subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:''})),
-  staff:false, parent:false,            // 공통: 운영진 / 엄빠
-  pre:false, event:false, review:false, female11:false
+subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:''})),
+staff:false, parent:false, // 공통: 운영진 / 엄빠
+pre:false, event:false, review:false, female11:false
 };
 
 const fmt = n => (n||0).toLocaleString('ko-KR') + '원';
 
 /* ---------- 어드민 설정 로드 (JSONP) ---------- */
 function loadConfig(){
-  return new Promise((resolve,reject)=>{
-    const cbName = 'cb_' + Date.now();
-    window[cbName] = (data)=>{ delete window[cbName]; s.remove(); resolve(data); };
-    const s = document.createElement('script');
-    s.src = WEBAPP_URL + '?callback=' + cbName + '&t=' + Date.now();
-    s.onerror = ()=>{ s.remove(); reject(new Error('network')); };
-    document.body.appendChild(s);
-    setTimeout(()=>{ if(window[cbName]){ delete window[cbName]; reject(new Error('timeout')); } }, 12000);
-  });
+return new Promise((resolve,reject)=>{
+const cbName = 'cb_' + Date.now();
+window[cbName] = (data)=>{ delete window[cbName]; s.remove(); resolve(data); };
+const s = document.createElement('script');
+s.src = WEBAPP_URL + '?callback=' + cbName + '&t=' + Date.now();
+s.onerror = ()=>{ s.remove(); reject(new Error('network')); };
+document.body.appendChild(s);
+setTimeout(()=>{ if(window[cbName]){ delete window[cbName]; reject(new Error('timeout')); } }, 12000);
+});
 }
 
 function genres(){ return [...new Set(CONFIG.classes.map(c=>c.genre))]; }
@@ -134,92 +134,104 @@ function classesOf(g){ return CONFIG.classes.filter(c=>c.genre===g); }
 function findClass(g,n){ return CONFIG.classes.find(c=>c.genre===g && c.name===n); }
 
 function preActive(){
-  if(!CONFIG.settings.preDeadline) return false;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const dl = new Date(CONFIG.settings.preDeadline + 'T23:59:59');
-  return today <= dl;
+if(!CONFIG.settings.preDeadline) return false;
+const today = new Date(); today.setHours(0,0,0,0);
+const dl = new Date(CONFIG.settings.preDeadline + 'T23:59:59');
+return today <= dl;
 }
 
 /* ---------- 시간 겹침 체크 ---------- */
 function toMin(t){ const m=t.match(/(\d{1,2}):(\d{2})/); return m? +m[1]*60 + +m[2] : null; }
 function timeRange(time){
-  const m = (time||'').match(/(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/);
-  return m ? [toMin(m[1]), toMin(m[2])] : null;
+const m = (time||'').match(/(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/);
+return m ? [toMin(m[1]), toMin(m[2])] : null;
 }
 function conflicts(){
-  const chosen = state.subjects.map(s=> s.genre&&s.cls ? findClass(s.genre,s.cls) : null).filter(Boolean);
-  const out=[];
-  for(let i=0;i<chosen.length;i++) for(let j=i+1;j<chosen.length;j++){
-    const a=timeRange(chosen[i].time), b=timeRange(chosen[j].time);
-    if(a&&b && a[0]<b[1] && b[0]<a[1]) out.push(chosen[i].name+' ↔ '+chosen[j].name);
-  }
-  return out;
+const chosen = state.subjects.map(s=> s.genre&&s.cls ? findClass(s.genre,s.cls) : null).filter(Boolean);
+const out=[];
+for(let i=0;i<chosen.length;i++) for(let j=i+1;j<chosen.length;j++){
+const a=timeRange(chosen[i].time), b=timeRange(chosen[j].time);
+if(a&&b && a[0]<b[1] && b[0]<a[1]) out.push(chosen[i].name+' ↔ '+chosen[j].name);
+}
+return out;
 }
 
 /* ---------- UI 렌더 ---------- */
 function renderSubjects(){
-  const box = document.getElementById('subjects');
-  box.innerHTML = '';
-  state.subjects.forEach((sub,i)=>{
-    const div = document.createElement('div');
-    div.className = 'subj';
-    const gOpts = ['<option value="">장르 선택</option>'].concat(genres().map(g=>`<option ${sub.genre===g?'selected':''}>${g}</option>`)).join('');
-    const cOpts = ['<option value="">클래스 선택</option>'].concat(
-      sub.genre ? classesOf(sub.genre).map(c=>`<option value="${c.name}" ${sub.cls===c.name?'selected':''}>${c.name} (${fmt(c.fee)}) · ${c.time}</option>`) : []
-    ).join('');
-    const cl = sub.genre&&sub.cls ? findClass(sub.genre,sub.cls) : null;
-    const price = cl ? subjectNet(cl) : 0;
-    div.innerHTML = `
-      <span class="badge">과목 ${i+1}</span>
-      <div class="row2">
-        <select data-i="${i}" data-k="genre">${gOpts}</select>
-        <select data-i="${i}" data-k="cls">${cOpts}</select>
-      </div>
-      <div class="price">${fmt(price)}</div>`;
-    box.appendChild(div);
-  });
-  box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
-    const i=+e.target.dataset.i, k=e.target.dataset.k;
-    state.subjects[i][k]=e.target.value;
-    if(k==='genre') state.subjects[i].cls='';
-    render();
-  }));
+const box = document.getElementById('subjects');
+box.innerHTML = '';
+state.subjects.forEach((sub,i)=>{
+const div = document.createElement('div');
+div.className = 'subj';
+const gOpts = ['<option value="">장르 선택</option>'].concat(genres().map(g=>`<option ${sub.genre===g?'selected':''}>${g}</option>`)).join('');
+const cOpts = ['<option value="">클래스 선택</option>'].concat(
+sub.genre ? classesOf(sub.genre).map(c=>{
+const tr = timeRange(c.time);
+const clash = state.subjects.some((os,oi)=>{
+if(oi===i || !os.genre || !os.cls) return false;
+const ocl = findClass(os.genre, os.cls);
+if(!ocl) return false;
+const otr = timeRange(ocl.time);
+return tr && otr && tr[0]<otr[1] && otr[0]<tr[1];
+});
+const sel = sub.cls===c.name ? 'selected' : '';
+const dis = (clash && sub.cls!==c.name) ? 'disabled' : '';
+const mark = dis ? ' (시간겹침)' : '';
+return `<option value="${c.name}" ${sel} ${dis}>${c.name} (${fmt(c.fee)}) · ${c.time}${mark}</option>`;
+}).join('') : []
+).join('');
+const cl = sub.genre&&sub.cls ? findClass(sub.genre,sub.cls) : null;
+const price = cl ? subjectNet(cl) : 0;
+div.innerHTML = `
+<span class="badge">과목 ${i+1}</span>
+<div class="row2">
+<select data-i="${i}" data-k="genre">${gOpts}</select>
+<select data-i="${i}" data-k="cls">${cOpts}</select>
+</div>
+<div class="price">${fmt(price)}</div>`;
+box.appendChild(div);
+});
+box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
+const i=+e.target.dataset.i, k=e.target.dataset.k;
+state.subjects[i][k]=e.target.value;
+if(k==='genre') state.subjects[i].cls='';
+render();
+}));
 }
 
 function renderGlobal(){
-  const pre = preActive();
-  const opts = [
-    {k:'staff', t:'운영진 할인 (전 과목 무료)', d:'다른 할인과 중복 적용 안 됨'},
-    {k:'parent', t:'엄빠 할인 (전 과목 50%)', d:'공연준비반 제외 · 다른 할인과 중복 안 됨'},
-    {k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
-    {k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
-    {k:'review', t:`수업후기 할인 (과목당 ${fmt(CONFIG.settings.reviewAmount)})`, d:'이전 차수 강습 후기 작성자'},
-    {k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'}
-  ];
-  const box = document.getElementById('globalOpts');
-  box.innerHTML = opts.map(o=>{
-    const dis = (o.k==='pre' && !pre);
-    return `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
-      <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
-  }).join('');
-  box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
-    const k=o.dataset.k;
-    state[k]=!state[k];
-    // 운영진/엄빠 상호 배타
-    if(k==='staff' && state.staff) state.parent=false;
-    if(k==='parent' && state.parent) state.staff=false;
-    render();
-  }));
+const pre = preActive();
+const opts = [
+{k:'staff', t:'운영진 할인', d:'다른 할인과 중복 적용 안 됨'},
+{k:'parent', t:'엄빠 할인', d:'공연준비반 제외 · 다른 할인과 중복 안 됨'},
+{k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
+{k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
+{k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'}
+];
+const box = document.getElementById('globalOpts');
+box.innerHTML = opts.map(o=>{
+const dis = (o.k==='pre' && !pre);
+return `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
+<div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
+}).join('');
+box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+const k=o.dataset.k;
+state[k]=!state[k];
+// 운영진/엄빠 상호 배타
+if(k==='staff' && state.staff) state.parent=false;
+if(k==='parent' && state.parent) state.staff=false;
+render();
+}));
 }
 
 /* ---------- 과목 단가(표시용): 운영진/엄빠 우선, 아니면 사전 차감 ---------- */
 function subjectNet(cl){
-  if(!cl) return 0;
-  if(state.staff && cl.staffRate>0) return cl.fee - Math.round(cl.fee*cl.staffRate/100);
-  if(state.parent && cl.parentRate>0) return cl.fee - Math.round(cl.fee*cl.parentRate/100);
-  let net = cl.fee;
-  if(state.pre && preActive() && cl.preDiscount>0) net -= cl.preDiscount;
-  return net;
+if(!cl) return 0;
+if(state.staff && cl.staffRate>0) return cl.fee - Math.round(cl.fee*cl.staffRate/100);
+if(state.parent && cl.parentRate>0) return cl.fee - Math.round(cl.fee*cl.parentRate/100);
+let net = cl.fee;
+if(state.pre && preActive() && cl.preDiscount>0) net -= cl.preDiscount;
+return net;
 }
 
 /* 운영진/엄빠가 "실제로" 걸리는 과목인지 (엄빠는 공연준비반=parentRate 0 이면 제외) */
@@ -228,142 +240,155 @@ function parentApplies(cl){ return state.parent && cl.parentRate>0; }
 
 /* ---------- 패키지 자동 감지 ---------- */
 function detectPackages(chosenKeys){
-  const have = (g,n)=> chosenKeys.some(k=>k.genre===g && k.cls===n);
-  let total=0; const labels=[];
-  for(const p of CONFIG.packages){
-    if(p.need.every(([g,n])=>have(g,n))){ total += p.discount; labels.push(p.label); }
-  }
-  return {total, labels};
+const have = (g,n)=> chosenKeys.some(k=>k.genre===g && k.cls===n);
+let total=0; const labels=[];
+for(const p of CONFIG.packages){
+if(p.need.every(([g,n])=>have(g,n))){ total += p.discount; labels.push(p.label); }
+}
+return {total, labels};
 }
 
 /* ---------- 전체 계산 ---------- */
 function calc(){
-  const chosen = state.subjects.map(s=>{
-    const cl = s.genre&&s.cls ? findClass(s.genre,s.cls) : null;
-    return cl ? {sub:s, cl} : null;
-  }).filter(Boolean);
+const chosen = state.subjects.map(s=>{
+const cl = s.genre&&s.cls ? findClass(s.genre,s.cls) : null;
+return cl ? {sub:s, cl} : null;
+}).filter(Boolean);
 
-  let subtotal=0, staffTotal=0, parentTotal=0, preTotal=0, plainCount=0;
-  chosen.forEach(({cl})=>{
-    subtotal += cl.fee;
-    if(staffApplies(cl)){
-      staffTotal += Math.round(cl.fee*cl.staffRate/100);
-    } else if(parentApplies(cl)){
-      parentTotal += Math.round(cl.fee*cl.parentRate/100);
-    } else {
-      // 일반 과목: 사전할인 대상 + 후기/이벤트/1+1 대상
-      if(state.pre && preActive() && cl.preDiscount>0) preTotal += cl.preDiscount;
-      plainCount++;
-    }
-  });
+let subtotal=0, staffTotal=0, parentTotal=0, preTotal=0, plainCount=0;
+chosen.forEach(({cl})=>{
+subtotal += cl.fee;
+if(staffApplies(cl)){
+staffTotal += Math.round(cl.fee*cl.staffRate/100);
+} else if(parentApplies(cl)){
+parentTotal += Math.round(cl.fee*cl.parentRate/100);
+} else {
+// 일반 과목: 사전할인 대상 + 후기/이벤트/1+1 대상
+if(state.pre && preActive() && cl.preDiscount>0) preTotal += cl.preDiscount;
+plainCount++;
+}
+});
 
-  // 운영진/엄빠가 하나라도 켜져 있으면 다른 공통할인(이벤트/후기/1+1/패키지)·사전은 무시
-  const hardDiscount = (state.staff || state.parent);
+// 운영진/엄빠가 하나라도 켜져 있으면 다른 공통할인(이벤트/후기/1+1/패키지)·사전은 무시
+const hardDiscount = (state.staff || state.parent);
 
-  const eventOff = (!hardDiscount && state.event) ? CONFIG.settings.eventAmount : 0;
-  const reviewOff = (!hardDiscount && state.review) ? plainCount * CONFIG.settings.reviewAmount : 0;
+const eventOff = (!hardDiscount && state.event) ? CONFIG.settings.eventAmount : 0;
+const reviewOff = (!hardDiscount && state.review) ? plainCount * CONFIG.settings.reviewAmount : 0;
 
-  let female11Off=0, female11Label='';
-  if(!hardDiscount && state.female11){
-    const begs = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
-      .map(({cl})=> subjectNet(cl)).sort((a,b)=>a-b);
-    if(begs.length){ female11Off = begs[0]; female11Label='비기너 1+1 (1명 무료)'; }
-  }
+let female11Off=0, female11Label='';
+if(!hardDiscount && state.female11){
+const begs = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
+.map(({cl})=> subjectNet(cl)).sort((a,b)=>a-b);
+if(begs.length){ female11Off = begs[0]; female11Label='비기너 1+1 (1명 무료)'; }
+}
 
-  let pkgOff=0, pkgLabels=[];
-  if(!hardDiscount){
-    const keys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
-    const pkg = detectPackages(keys);
-    pkgOff = pkg.total; pkgLabels = pkg.labels.slice();
-    if(pkgOff>0 && preTotal>0){            // 패키지 vs 사전 중복불가 → 유리한 쪽
-      if(pkgOff >= preTotal) preTotal=0; else { pkgOff=0; pkgLabels=[]; }
-    }
-  } else {
-    preTotal = 0; // 운영진/엄빠 시 사전할인도 무시
-  }
+let pkgOff=0, pkgLabels=[];
+if(!hardDiscount){
+const keys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
+const pkg = detectPackages(keys);
+pkgOff = pkg.total; pkgLabels = pkg.labels.slice();
 
-  const total = Math.max(0, subtotal - staffTotal - parentTotal - preTotal - eventOff - reviewOff - female11Off - pkgOff);
-  return {chosen, subtotal, staffTotal, parentTotal, preTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
+// 비기너 1+1 (살사 비기너 + 바차타 비기너 동반 시 1명 무료)
+const isBeginner = (name)=> /비기너|입문/.test(name||'');
+const begCls = chosen
+.filter(({cl})=> isBeginner(cl.name))
+.map(({cl})=> cl)
+.sort((a,b)=> a.fee-b.fee);
+const hasSalsaBeg = chosen.some(({sub,cl})=> sub.genre==='살사' && isBeginner(cl.name));
+const hasBachataBeg = chosen.some(({sub,cl})=> sub.genre==='바차타' && isBeginner(cl.name));
+if(hasSalsaBeg && hasBachataBeg && begCls.length>=2){
+pkgOff += begCls[0].fee;        // 더 저렴한 비기너 1개 무료
+pkgLabels.push('비기너 1+1');
+}
+
+if(pkgOff>0 && preTotal>0){              // 패키지 vs 사전 중복불가 → 유리한 쪽
+if(pkgOff >= preTotal) preTotal=0; else { pkgOff=0; pkgLabels=[]; }
+}
+} else {
+preTotal = 0; // 운영진/엄빠 시 사전할인도 무시
+}
+
+const total = Math.max(0, subtotal - staffTotal - parentTotal - preTotal - eventOff - reviewOff - female11Off - pkgOff);
+return {chosen, subtotal, staffTotal, parentTotal, preTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
 }
 
 /* ---------- 렌더 ---------- */
 function render(){
-  renderSubjects(); renderGlobal();
-  const r = calc();
-  const lines=[];
-  lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
-  if(r.staffTotal) lines.push(`<div class="sline disc"><span>운영진 할인</span><span>-${fmt(r.staffTotal)}</span></div>`);
-  if(r.parentTotal) lines.push(`<div class="sline disc"><span>엄빠 할인</span><span>-${fmt(r.parentTotal)}</span></div>`);
-  if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
-  if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
-  if(r.reviewOff) lines.push(`<div class="sline disc"><span>수업후기 할인</span><span>-${fmt(r.reviewOff)}</span></div>`);
-  if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
-  if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
-  document.getElementById('breakdown').innerHTML = lines.join('');
-  document.getElementById('grandTotal').textContent = fmt(r.total);
+renderSubjects(); renderGlobal();
+const r = calc();
+const lines=[];
+lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
+if(r.staffTotal) lines.push(`<div class="sline disc"><span>운영진 할인</span><span>-${fmt(r.staffTotal)}</span></div>`);
+if(r.parentTotal) lines.push(`<div class="sline disc"><span>엄빠 할인</span><span>-${fmt(r.parentTotal)}</span></div>`);
+if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
+if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
+if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
+if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
+document.getElementById('breakdown').innerHTML = lines.join('');
+document.getElementById('grandTotal').textContent = fmt(r.total);
 
-  if(r.pkgLabels.length){
-    document.getElementById('breakdown').insertAdjacentHTML('beforeend',
-      `<div class="note">✓ ${r.pkgLabels.join(', ')} 적용됨</div>`);
-  }
-  if((state.staff||state.parent) && (state.event||state.review||state.female11||state.pre)){
-    document.getElementById('breakdown').insertAdjacentHTML('beforeend',
-      `<div class="note">※ 운영진/엄빠 할인은 다른 할인과 중복되지 않아 단독 적용됩니다.</div>`);
-  }
-  const cf = conflicts();
-  document.getElementById('conflictWarn').textContent = cf.length ? '⚠ 수업시간이 겹칩니다: '+cf.join(', ') : '';
+if(r.pkgLabels.length){
+document.getElementById('breakdown').insertAdjacentHTML('beforeend',
+`<div class="note">✓ ${r.pkgLabels.join(', ')} 적용됨</div>`);
+}
+if((state.staff||state.parent) && (state.event||state.female11||state.pre)){
+document.getElementById('breakdown').insertAdjacentHTML('beforeend',
+`<div class="note">※ 운영진/엄빠 할인은 다른 할인과 중복되지 않아 단독 적용됩니다.</div>`);
+}
+const cf = conflicts();
+document.getElementById('conflictWarn').textContent = cf.length ? '⚠ 수업시간이 겹칩니다: '+cf.join(', ') : '';
 }
 
 /* ---------- 저장 ---------- */
 function save(){
-  const nick = document.getElementById('nickname').value.trim();
-  if(!nick){ toast('닉네임을 입력해주세요'); return; }
-  const r = calc();
-  if(!r.chosen.length){ toast('과목을 선택해주세요'); return; }
-  const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
-  const discs=[];
-  if(r.staffTotal)discs.push('운영진');if(r.parentTotal)discs.push('엄빠');
-  if(r.preTotal)discs.push('사전');if(r.eventOff)discs.push('개편이벤트');if(r.reviewOff)discs.push('후기');
-  if(r.female11Off)discs.push('1+1');if(r.pkgLabels.length)discs.push('패키지');
-  const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
+const nick = document.getElementById('nickname').value.trim();
+if(!nick){ toast('닉네임을 입력해주세요'); return; }
+const r = calc();
+if(!r.chosen.length){ toast('과목을 선택해주세요'); return; }
+const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
+const discs=[];
+if(r.staffTotal)discs.push('운영진');if(r.parentTotal)discs.push('엄빠');
+if(r.preTotal)discs.push('사전');if(r.eventOff)discs.push('개편이벤트');
+if(r.female11Off)discs.push('1+1');if(r.pkgLabels.length)discs.push('패키지');
+const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
 
-  fetch(WEBAPP_URL, {method:'POST', mode:'no-cors',
-    headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
-    .then(()=>toast('✓ 기록이 저장되었습니다'))
-    .catch(()=>toast('저장 요청을 보냈습니다'));
+fetch(WEBAPP_URL, {method:'POST', mode:'no-cors',
+headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+.then(()=>toast('✓ 기록이 저장되었습니다'))
+.catch(()=>toast('저장 요청을 보냈습니다'));
 }
 
 function toast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
+const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+setTimeout(()=>t.classList.remove('show'),2200);
 }
 
 function reset(){
-  state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:''}));
-  state.staff=false; state.parent=false; state.pre=false; state.event=false; state.review=false; state.female11=false;
-  document.getElementById('nickname').value='';
-  render();
+state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:''}));
+state.staff=false; state.parent=false; state.pre=false; state.event=false; state.review=false; state.female11=false;
+document.getElementById('nickname').value='';
+render();
 }
 
 /* ---------- 초기화 ---------- */
 async function init(){
-  try{
-    const res = await loadConfig();
-    if(!res || !res.ok) throw new Error(res && res.error || 'no data');
-    CONFIG = res.config;
-    const sync = document.getElementById('sync');
-    sync.textContent = '✓ 어드민 동기화 ('+ new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) +')';
-    sync.classList.remove('fail');
-    render();
-  }catch(e){
-    document.getElementById('sync').textContent = '✗ 어드민 동기화 실패';
-    document.getElementById('sync').classList.add('fail');
-    document.getElementById('loadtxt').textContent = '설정을 불러오지 못했습니다. 웹앱 배포/권한을 확인하세요.';
-    return;
-  }
-  document.getElementById('loading').style.display='none';
-  document.getElementById('saveBtn').addEventListener('click',save);
-  document.getElementById('resetBtn').addEventListener('click',reset);
+try{
+const res = await loadConfig();
+if(!res || !res.ok) throw new Error(res && res.error || 'no data');
+CONFIG = res.config;
+const sync = document.getElementById('sync');
+sync.textContent = '✓ 어드민 동기화 ('+ new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) +')';
+sync.classList.remove('fail');
+render();
+}catch(e){
+document.getElementById('sync').textContent = '✗ 어드민 동기화 실패';
+document.getElementById('sync').classList.add('fail');
+document.getElementById('loadtxt').textContent = '설정을 불러오지 못했습니다. 웹앱 배포/권한을 확인하세요.';
+return;
+}
+document.getElementById('loading').style.display='none';
+document.getElementById('saveBtn').addEventListener('click',save);
+document.getElementById('resetBtn').addEventListener('click',reset);
 }
 init();
 </script>
