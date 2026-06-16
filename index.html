@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라틴소울 수강료 계산기 3.0</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#120a14; --card:#1e1320; --card2:#271828; --line:#3a2740;
+  --txt:#f3eef5; --sub:#a99fb0; --accent:#ff5a3c; --accent2:#ff8a3c;
+  --ok:#37d67a; --chip:#2c1d30; --chipon:#ff5a3c;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;}
+body{background:var(--bg);color:var(--txt);line-height:1.5;}
+.header{background:linear-gradient(160deg,#2a0f2e 0%,#3a1230 45%,#1a0a1c 100%);
+  padding:32px 16px 28px;text-align:center;border-bottom:1px solid var(--line);}
+.header h1{font-size:30px;font-weight:800;}
+.header h1 b{color:var(--accent);}
+.header p{color:var(--sub);font-size:14px;margin-top:6px;}
+.sync{display:inline-block;margin-top:10px;font-size:12px;color:var(--ok);
+  background:rgba(55,214,122,.12);padding:4px 12px;border-radius:20px;}
+.sync.fail{color:#ff7676;background:rgba(255,118,118,.12);}
+.wrap{max-width:560px;margin:0 auto;padding:24px 16px 80px;}
+label.lbl{display:block;font-size:14px;font-weight:700;margin:18px 0 8px;}
+input[type=text]{width:100%;padding:14px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--txt);font-size:15px;}
+input[type=text]::placeholder{color:#6b5f72;}
+.subj{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+.badge{display:inline-block;background:var(--accent);color:#fff;font-weight:700;font-size:13px;
+  padding:4px 12px;border-radius:8px;margin-bottom:12px;}
+.row2{display:flex;gap:10px;}
+.row2 select{flex:1;padding:13px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card2);color:var(--txt);font-size:14px;}
+.price{font-size:22px;font-weight:800;margin-top:12px;}
+.toggles{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.chip{background:var(--chip);border:1px solid var(--line);color:var(--sub);
+  font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;cursor:pointer;user-select:none;transition:.15s;}
+.chip.on{background:var(--chipon);color:#fff;border-color:var(--chipon);}
+.chip.disabled{opacity:.35;cursor:not-allowed;}
+.global-opts{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px;}
+.opt{display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;}
+.opt.on{border-color:var(--accent);background:var(--card2);}
+.opt .t{font-size:14px;font-weight:700;}
+.opt .d{font-size:12px;color:var(--sub);margin-top:2px;}
+.opt .sw{width:44px;height:26px;border-radius:20px;background:#3a2740;position:relative;flex:0 0 auto;transition:.2s;}
+.opt.on .sw{background:var(--accent);}
+.opt .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+.opt.on .sw::after{left:21px;}
+.note{font-size:12px;color:var(--accent2);background:rgba(255,138,60,.1);
+  border-radius:10px;padding:10px 12px;margin-top:10px;}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px;}
+.summary h3{font-size:16px;margin-bottom:14px;}
+.sline{display:flex;justify-content:space-between;font-size:14px;color:var(--sub);margin:7px 0;}
+.sline span:last-child{color:var(--txt);font-weight:600;}
+.sline.disc span:last-child{color:var(--ok);}
+.hr{height:1px;background:var(--line);margin:14px 0;}
+.total{display:flex;justify-content:space-between;align-items:center;}
+.total .lab{font-size:17px;font-weight:800;}
+.total .val{font-size:28px;font-weight:800;color:var(--accent);}
+.btns{display:flex;gap:10px;margin-top:18px;}
+.btns button{flex:1;padding:15px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
+.btn-save{background:var(--accent);color:#fff;}
+.btn-reset{background:var(--card2);color:var(--sub);border:1px solid var(--line)!important;}
+.warn{color:#ff7676;font-size:12px;margin-top:8px;}
+.loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:99;gap:16px;}
+.spin{width:46px;height:46px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;
+  padding:12px 22px;border-radius:30px;font-size:14px;opacity:0;transition:.3s;z-index:100;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading"><div class="spin"></div><div id="loadtxt">어드민 설정 불러오는 중...</div></div>
+
+<div class="header">
+  <h1><b>수강료</b> 계산기 <span style="font-size:18px;color:var(--accent2)">3.0</span></h1>
+  <p>라틴소울 · 살사 & 바차타 20차수 수강료 자동 계산 & 기록</p>
+  <span class="sync" id="sync">동기화 중...</span>
+</div>
+
+<div class="wrap">
+  <label class="lbl">닉네임</label>
+  <input type="text" id="nickname" placeholder="닉네임을 입력하세요">
+
+  <label class="lbl">과목 선택</label>
+  <div id="subjects"></div>
+
+  <label class="lbl">공통 할인 / 이벤트</label>
+  <div class="global-opts" id="globalOpts"></div>
+
+  <div class="summary">
+    <h3>계산 내역</h3>
+    <div id="breakdown"></div>
+    <div class="hr"></div>
+    <div class="total"><span class="lab">최종 합계</span><span class="val" id="grandTotal">0원</span></div>
+    <div id="conflictWarn" class="warn"></div>
+  </div>
+
+  <div class="btns">
+    <button class="btn-save" id="saveBtn">기록 저장</button>
+    <button class="btn-reset" id="resetBtn">초기화</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzMB8ltV5JAla8neDIxgWPK-6tw7ViDpxbbzU2QEvcuPsc9yFF-F_flhavAqCy2w4nfPQ/exec";
+const NUM_SUBJECTS = 3;
+
+let CONFIG = null;
+const state = {
+  subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:'', staff:false, parent:false})),
+  pre:false, event:false, review:false, female11:false
+};
+
+const fmt = n => (n||0).toLocaleString('ko-KR') + '원';
+
+/* ---------- 어드민 설정 로드 (JSONP) ---------- */
+function loadConfig(){
+  return new Promise((resolve,reject)=>{
+    const cbName = 'cb_' + Date.now();
+    window[cbName] = (data)=>{ delete window[cbName]; s.remove(); resolve(data); };
+    const s = document.createElement('script');
+    s.src = WEBAPP_URL + '?callback=' + cbName + '&t=' + Date.now();
+    s.onerror = ()=>{ s.remove(); reject(new Error('network')); };
+    document.body.appendChild(s);
+    setTimeout(()=>{ if(window[cbName]){ delete window[cbName]; reject(new Error('timeout')); } }, 12000);
+  });
+}
+
+function genres(){ return [...new Set(CONFIG.classes.map(c=>c.genre))]; }
+function classesOf(g){ return CONFIG.classes.filter(c=>c.genre===g); }
+function findClass(g,n){ return CONFIG.classes.find(c=>c.genre===g && c.name===n); }
+
+/* 사전할인 활성 여부 (마감일 이내) */
+function preActive(){
+  if(!CONFIG.settings.preDeadline) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dl = new Date(CONFIG.settings.preDeadline + 'T23:59:59');
+  return today <= dl;
+}
+
+/* ---------- 시간 겹침 체크 ---------- */
+function toMin(t){ const m=t.match(/(\d{1,2}):(\d{2})/); return m? +m[1]*60 + +m[2] : null; }
+function timeRange(time){
+  const m = (time||'').match(/(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/);
+  return m ? [toMin(m[1]), toMin(m[2])] : null;
+}
+function conflicts(){
+  const chosen = state.subjects.map(s=> s.genre&&s.cls ? findClass(s.genre,s.cls) : null).filter(Boolean);
+  const out=[];
+  for(let i=0;i<chosen.length;i++) for(let j=i+1;j<chosen.length;j++){
+    const a=timeRange(chosen[i].time), b=timeRange(chosen[j].time);
+    if(a&&b && a[0]<b[1] && b[0]<a[1]) out.push(chosen[i].name+' ↔ '+chosen[j].name);
+  }
+  return out;
+}
+
+/* ---------- UI 렌더 ---------- */
+function renderSubjects(){
+  const box = document.getElementById('subjects');
+  box.innerHTML = '';
+  state.subjects.forEach((sub,i)=>{
+    const div = document.createElement('div');
+    div.className = 'subj';
+    const gOpts = ['<option value="">장르 선택</option>'].concat(genres().map(g=>`<option ${sub.genre===g?'selected':''}>${g}</option>`)).join('');
+    const cOpts = ['<option value="">클래스 선택</option>'].concat(
+      sub.genre ? classesOf(sub.genre).map(c=>`<option value="${c.name}" ${sub.cls===c.name?'selected':''}>${c.name} (${fmt(c.fee)}) · ${c.time}</option>`) : []
+    ).join('');
+    const cl = sub.genre&&sub.cls ? findClass(sub.genre,sub.cls) : null;
+    const price = cl ? subjectPrice(sub, cl).net : 0;
+    const parentDisabled = cl && cl.parentRate<=0;
+    div.innerHTML = `
+      <span class="badge">과목 ${i+1}</span>
+      <div class="row2">
+        <select data-i="${i}" data-k="genre">${gOpts}</select>
+        <select data-i="${i}" data-k="cls">${cOpts}</select>
+      </div>
+      <div class="price">${fmt(price)}</div>
+      <div class="toggles">
+        <span class="chip ${sub.staff?'on':''}" data-i="${i}" data-t="staff">운영진</span>
+        <span class="chip ${sub.parent?'on':''} ${parentDisabled?'disabled':''}" data-i="${i}" data-t="parent">엄빠</span>
+      </div>`;
+    box.appendChild(div);
+  });
+  box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
+    const i=+e.target.dataset.i, k=e.target.dataset.k;
+    state.subjects[i][k]=e.target.value;
+    if(k==='genre') state.subjects[i].cls='';
+    render();
+  }));
+  box.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',e=>{
+    if(e.target.classList.contains('disabled')) return;
+    const i=+e.target.dataset.i, t=e.target.dataset.t;
+    state.subjects[i][t] = !state.subjects[i][t];
+    if(t==='staff' && state.subjects[i].staff) state.subjects[i].parent=false;
+    if(t==='parent' && state.subjects[i].parent) state.subjects[i].staff=false;
+    render();
+  }));
+}
+
+function renderGlobal(){
+  const pre = preActive();
+  const opts = [
+    {k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
+    {k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
+    {k:'review', t:`수업후기 할인 (과목당 ${fmt(CONFIG.settings.reviewAmount)})`, d:'이전 차수 강습 후기 작성자'},
+    {k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'}
+  ];
+  const box = document.getElementById('globalOpts');
+  box.innerHTML = opts.map(o=>{
+    const dis = (o.k==='pre' && !pre);
+    return `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
+      <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
+  }).join('');
+  box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',e=>{
+    const k=o.dataset.k; state[k]=!state[k]; render();
+  }));
+}
+
+/* ---------- 과목별 단가 계산 ----------
+   운영진(100%)/엄빠(50%)는 중복불가 & 다른할인 무시.
+   그 외엔 정가 - 사전(과목당) 적용. */
+function subjectPrice(sub, cl){
+  if(!cl) return {fee:0, net:0, label:'', staffOff:0, parentOff:0, preOff:0};
+  const fee = cl.fee;
+  if(sub.staff && cl.staffRate>0){
+    const off = Math.round(fee*cl.staffRate/100);
+    return {fee, net:fee-off, label:'운영진', staffOff:off, parentOff:0, preOff:0};
+  }
+  if(sub.parent && cl.parentRate>0){
+    const off = Math.round(fee*cl.parentRate/100);
+    return {fee, net:fee-off, label:'엄빠', staffOff:0, parentOff:off, preOff:0};
+  }
+  // 일반: 사전할인만 과목 단가에서 차감
+  let preOff = 0;
+  if(state.pre && preActive() && cl.preDiscount>0) preOff = cl.preDiscount;
+  return {fee, net:fee-preOff, label:'', staffOff:0, parentOff:0, preOff};
+}
+
+/* 한 과목이 "일반"(운영진/엄빠 미적용) 인지 */
+function isPlain(sub, cl){ 
+  return !(sub.staff && cl.staffRate>0) && !(sub.parent && cl.parentRate>0);
+}
+
+/* ---------- 패키지 자동 감지 ---------- */
+function detectPackages(chosenKeys){
+  const have = (g,n)=> chosenKeys.some(k=>k.genre===g && k.cls===n);
+  const used = []; let total = 0; const labels=[];
+  for(const p of CONFIG.packages){
+    if(p.need.every(([g,n])=>have(g,n))){
+      total += p.discount; labels.push(p.label);
+    }
+  }
+  return {total, labels};
+}
+
+/* ---------- 전체 계산 ---------- */
+function calc(){
+  const chosen = state.subjects.map(s=>{
+    const cl = s.genre&&s.cls ? findClass(s.genre,s.cls) : null;
+    return cl ? {sub:s, cl} : null;
+  }).filter(Boolean);
+
+  let subtotal=0, preTotal=0, staffTotal=0, parentTotal=0;
+  let plainCount=0;
+  chosen.forEach(({sub,cl})=>{
+    const p = subjectPrice(sub,cl);
+    subtotal += p.fee;
+    preTotal += p.preOff;
+    staffTotal += p.staffOff;
+    parentTotal += p.parentOff;
+    if(isPlain(sub,cl)) plainCount++;
+  });
+
+  // 개편이벤트: 인당(=신청자 1명) 1회 차감
+  const eventOff = state.event ? CONFIG.settings.eventAmount : 0;
+  // 수업후기: 과목당 (일반 과목 대상)
+  const reviewOff = state.review ? plainCount * CONFIG.settings.reviewAmount : 0;
+
+  // 여성 1+1: 살사/바차타 비기너 1과목 무료 (가장 저렴한 비기너 1개)
+  let female11Off = 0, female11Label='';
+  if(state.female11){
+    const beginners = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
+      .map(({sub,cl})=>subjectPrice(sub,cl).net).sort((a,b)=>a-b);
+    if(beginners.length){ female11Off = beginners[0]; female11Label='비기너 1+1 (1명 무료)'; }
+  }
+
+  // 패키지 (사전할인과 중복 불가)
+  const chosenKeys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
+  const pkg = detectPackages(chosenKeys);
+  let pkgOff = pkg.total, pkgLabels = pkg.labels.slice();
+  if(pkgOff>0 && preTotal>0){
+    // 사전할인과 패키지 중 유리한 쪽
+    if(pkgOff >= preTotal){ preTotal=0; } else { pkgOff=0; pkgLabels=[]; }
+  }
+
+  const total = Math.max(0, subtotal - preTotal - staffTotal - parentTotal - eventOff - reviewOff - female11Off - pkgOff);
+  return {chosen, subtotal, preTotal, staffTotal, parentTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
+}
+
+/* ---------- 렌더 ---------- */
+function render(){
+  renderSubjects(); renderGlobal();
+  const r = calc();
+  const lines=[];
+  lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
+  if(r.staffTotal) lines.push(`<div class="sline disc"><span>운영진 할인</span><span>-${fmt(r.staffTotal)}</span></div>`);
+  if(r.parentTotal) lines.push(`<div class="sline disc"><span>엄빠 할인</span><span>-${fmt(r.parentTotal)}</span></div>`);
+  if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
+  if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
+  if(r.reviewOff) lines.push(`<div class="sline disc"><span>수업후기 할인</span><span>-${fmt(r.reviewOff)}</span></div>`);
+  if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
+  if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
+  document.getElementById('breakdown').innerHTML = lines.join('');
+  document.getElementById('grandTotal').textContent = fmt(r.total);
+
+  if(r.pkgLabels.length){
+    document.getElementById('breakdown').insertAdjacentHTML('beforeend',
+      `<div class="note">✓ ${r.pkgLabels.join(', ')} 적용됨</div>`);
+  }
+  const cf = conflicts();
+  document.getElementById('conflictWarn').textContent = cf.length ? '⚠ 수업시간이 겹칩니다: '+cf.join(', ') : '';
+}
+
+/* ---------- 저장 ---------- */
+function save(){
+  const nick = document.getElementById('nickname').value.trim();
+  if(!nick){ toast('닉네임을 입력해주세요'); return; }
+  const r = calc();
+  if(!r.chosen.length){ toast('과목을 선택해주세요'); return; }
+  const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`+(sub.staff?'(운영진)':sub.parent?'(엄빠)':'')).join(', ');
+  const discs=[];
+  if(r.preTotal)discs.push('사전');if(r.eventOff)discs.push('개편이벤트');if(r.reviewOff)discs.push('후기');
+  if(r.female11Off)discs.push('1+1');if(r.pkgLabels.length)discs.push('패키지');
+  const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
+
+  fetch(WEBAPP_URL, {method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+    .then(()=>toast('✓ 기록이 저장되었습니다'))
+    .catch(()=>toast('저장 요청을 보냈습니다'));
+}
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function reset(){
+  state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:'',staff:false,parent:false}));
+  state.pre=false; state.event=false; state.review=false; state.female11=false;
+  document.getElementById('nickname').value='';
+  render();
+}
+
+/* ---------- 초기화 ---------- */
+async function init(){
+  try{
+    const res = await loadConfig();
+    if(!res || !res.ok) throw new Error(res && res.error || 'no data');
+    CONFIG = res.config;
+    const sync = document.getElementById('sync');
+    sync.textContent = '✓ 어드민 동기화 ('+ new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) +')';
+    sync.classList.remove('fail');
+    render();
+  }catch(e){
+    document.getElementById('sync').textContent = '✗ 어드민 동기화 실패';
+    document.getElementById('sync').classList.add('fail');
+    document.getElementById('loadtxt').textContent = '설정을 불러오지 못했습니다. 웹앱 배포/권한을 확인하세요.';
+    return;
+  }
+  document.getElementById('loading').style.display='none';
+  document.getElementById('saveBtn').addEventListener('click',save);
+  document.getElementById('resetBtn').addEventListener('click',reset);
+}
+init();
+</script>
+</body>
+</html>
