@@ -43,6 +43,12 @@ background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1
 .opt.on .sw{background:var(--accent);}
 .opt .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
 .opt.on .sw::after{left:21px;}
+.counter{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+.counter button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;
+background:var(--card2);color:var(--txt);font-size:20px;font-weight:700;line-height:1;cursor:pointer;
+display:flex;align-items:center;justify-content:center;}
+.counter button:disabled{opacity:.35;cursor:not-allowed;}
+.counter .cnt{min-width:24px;text-align:center;font-size:16px;font-weight:800;}
 .note{font-size:12px;color:var(--accent2);background:rgba(255,138,60,.1);
 border-radius:10px;padding:10px 12px;margin-top:10px;}
 .summary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px;}
@@ -101,7 +107,7 @@ const NUM_SUBJECTS = 3;
 let CONFIG = null;
 const state = {
 subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:''})),
-pre:false, event:false, review:false, female11:false
+pre:false, event:false, reviewCount:0, female11:false
 };
 const fmt = n => (n||0).toLocaleString('ko-KR') + '원';
 
@@ -125,6 +131,10 @@ if(!CONFIG.settings.preDeadline) return false;
 const today = new Date(); today.setHours(0,0,0,0);
 const dl = new Date(CONFIG.settings.preDeadline + 'T23:59:59');
 return today <= dl;
+}
+/* 현재 선택된 과목 수 (후기 개수 상한) */
+function selectedCount(){
+return state.subjects.filter(s=> s.genre && s.cls && findClass(s.genre,s.cls)).length;
 }
 
 /* ---------- 시간 겹침 체크 ---------- */
@@ -182,33 +192,65 @@ box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
 const i=+e.target.dataset.i, k=e.target.dataset.k;
 state.subjects[i][k]=e.target.value;
 if(k==='genre') state.subjects[i].cls='';
+// 후기 개수가 과목 수를 넘지 않도록 조정
+const max = selectedCount();
+if(state.reviewCount > max) state.reviewCount = max;
 render();
 }));
 }
 
 function renderGlobal(){
 const pre = preActive();
-const opts = [
+const maxReview = selectedCount();
+if(state.reviewCount > maxReview) state.reviewCount = maxReview;
+
+const box = document.getElementById('globalOpts');
+let html = '';
+
+// 토글형 옵션 (사전 / 개편이벤트 / 여성1+1)
+const toggleOpts = [
 {k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
 {k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
-{k:'review', t:'수업 후기 할인 (과목당 5천원)', d:'이전 차수 강습 후기 작성자'},
-{k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'},
-{k:'package', t:'패키지 할인 (자동 적용)', d:'조건 충족 시 자동 적용 · 사전할인과 중복 안 됨', readonly:true}
+{k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'}
 ];
-const box = document.getElementById('globalOpts');
-box.innerHTML = opts.map(o=>{
+toggleOpts.forEach(o=>{
 const dis = (o.k==='pre' && !pre);
-if(o.readonly){
-return `<div class="opt" data-k="${o.k}" style="cursor:default;pointer-events:none">
-<div><div class="t">${o.t}</div><div class="d">${o.d}</div></div></div>`;
-}
-return `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
+html += `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
 <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
-}).join('');
-box.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+});
+
+// 후기 할인 (개수 카운터)
+const minusDis = state.reviewCount<=0 ? 'disabled' : '';
+const plusDis = state.reviewCount>=maxReview ? 'disabled' : '';
+html += `<div class="opt" style="cursor:default">
+<div><div class="t">후기 할인 (수업당 ${fmt(CONFIG.settings.reviewAmount)})</div>
+<div class="d">전 차수 수업 후기를 작성하셨을 경우 수업당 ${fmt(CONFIG.settings.reviewAmount)} 할인 적용됩니다.</div></div>
+<div class="counter">
+<button type="button" data-act="review-minus" ${minusDis}>−</button>
+<span class="cnt">${state.reviewCount}</span>
+<button type="button" data-act="review-plus" ${plusDis}>+</button>
+</div></div>`;
+
+// 패키지 안내 (읽기 전용)
+html += `<div class="opt" style="cursor:default;pointer-events:none">
+<div><div class="t">패키지 할인 (자동 적용)</div>
+<div class="d">조건 충족 시 자동 적용 · 사전할인과 중복 안 됨</div></div></div>`;
+
+box.innerHTML = html;
+
+// 토글 클릭
+box.querySelectorAll('.opt[data-k]').forEach(o=>o.addEventListener('click',()=>{
 const k=o.dataset.k;
-if(k==='package') return;
 state[k]=!state[k];
+render();
+}));
+// 후기 +/- 클릭
+box.querySelectorAll('button[data-act]').forEach(b=>b.addEventListener('click',(e)=>{
+e.stopPropagation();
+const act=b.dataset.act;
+const max=selectedCount();
+if(act==='review-plus' && state.reviewCount<max) state.reviewCount++;
+if(act==='review-minus' && state.reviewCount>0) state.reviewCount--;
 render();
 }));
 }
@@ -245,15 +287,17 @@ const cl = s.genre&&s.cls ? findClass(s.genre,s.cls) : null;
 return cl ? {sub:s, cl} : null;
 }).filter(Boolean);
 
-let subtotal=0, preTotal=0, plainCount=0;
+let subtotal=0, preTotal=0;
 chosen.forEach(({cl})=>{
 subtotal += cl.fee;
 if(state.pre && preActive() && cl.preDiscount>0) preTotal += cl.preDiscount;
-plainCount++;
 });
 
 const eventOff = state.event ? CONFIG.settings.eventAmount : 0;
-const reviewOff = state.review ? plainCount * CONFIG.settings.reviewAmount : 0;
+
+// 후기 할인: 개수 × 단가 (과목 수를 상한으로 clamp)
+const reviewCount = Math.min(state.reviewCount, chosen.length);
+const reviewOff = reviewCount * CONFIG.settings.reviewAmount;
 
 let female11Off=0, female11Label='';
 if(state.female11){
@@ -280,7 +324,7 @@ if(preTotal < 0) preTotal = 0;
 }
 
 const total = Math.max(0, subtotal - preTotal - eventOff - reviewOff - female11Off - pkgOff);
-return {chosen, subtotal, preTotal, eventOff, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
+return {chosen, subtotal, preTotal, eventOff, reviewCount, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
 }
 
 /* ---------- 렌더 ---------- */
@@ -291,7 +335,7 @@ const lines=[];
 lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
 if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
 if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
-if(r.reviewOff) lines.push(`<div class="sline disc"><span>후기 할인</span><span>-${fmt(r.reviewOff)}</span></div>`);
+if(r.reviewOff) lines.push(`<div class="sline disc"><span>후기 할인 (${r.reviewCount}건)</span><span>-${fmt(r.reviewOff)}</span></div>`);
 if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
 if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
 document.getElementById('breakdown').innerHTML = lines.join('');
@@ -316,7 +360,7 @@ const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
 const discs=[];
 if(r.preTotal)discs.push('사전');
 if(r.eventOff)discs.push('개편이벤트');
-if(r.reviewOff)discs.push('후기');
+if(r.reviewOff)discs.push(`후기${r.reviewCount}`);
 if(r.female11Off)discs.push('1+1');
 if(r.pkgLabels.length)discs.push('패키지');
 const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
@@ -333,7 +377,7 @@ setTimeout(()=>t.classList.remove('show'),2200);
 
 function reset(){
 state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:''}));
-state.pre=false; state.event=false; state.review=false; state.female11=false;
+state.pre=false; state.event=false; state.reviewCount=0; state.female11=false;
 document.getElementById('nickname').value='';
 render();
 }
