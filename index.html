@@ -43,12 +43,6 @@ background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1
 .opt.on .sw{background:var(--accent);}
 .opt .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
 .opt.on .sw::after{left:21px;}
-.counter{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
-.counter button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;
-background:var(--card2);color:var(--txt);font-size:20px;font-weight:700;line-height:1;cursor:pointer;
-display:flex;align-items:center;justify-content:center;}
-.counter button:disabled{opacity:.35;cursor:not-allowed;}
-.counter .cnt{min-width:24px;text-align:center;font-size:16px;font-weight:800;}
 .note{font-size:12px;color:var(--accent2);background:rgba(255,138,60,.1);
 border-radius:10px;padding:10px 12px;margin-top:10px;}
 .summary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px;}
@@ -107,7 +101,7 @@ const NUM_SUBJECTS = 3;
 let CONFIG = null;
 const state = {
 subjects: Array.from({length:NUM_SUBJECTS}, () => ({genre:'', cls:''})),
-pre:false, event:false, reviewCount:0, female11:false
+pre:false, event:false, female11:false
 };
 const fmt = n => (n||0).toLocaleString('ko-KR') + '원';
 
@@ -132,9 +126,12 @@ const today = new Date(); today.setHours(0,0,0,0);
 const dl = new Date(CONFIG.settings.preDeadline + 'T23:59:59');
 return today <= dl;
 }
-/* 현재 선택된 과목 수 (후기 개수 상한) */
-function selectedCount(){
-return state.subjects.filter(s=> s.genre && s.cls && findClass(s.genre,s.cls)).length;
+
+/* ---------- 비기너(살사/바차타 비기너·입문반) 판별 ---------- */
+function isBeginner(cl){
+if(!cl) return false;
+const n = cl.name || '';
+return (cl.genre==='살사' || cl.genre==='바차타') && (n.includes('비기너') || n.includes('입문'));
 }
 
 /* ---------- 시간 겹침 체크 ---------- */
@@ -192,43 +189,44 @@ box.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',e=>{
 const i=+e.target.dataset.i, k=e.target.dataset.k;
 state.subjects[i][k]=e.target.value;
 if(k==='genre') state.subjects[i].cls='';
-// 후기 개수가 과목 수를 넘지 않도록 조정
-const max = selectedCount();
-if(state.reviewCount > max) state.reviewCount = max;
 render();
 }));
 }
 
-function renderGlobal(){
+function renderGlobal(beginnerActive){
 const pre = preActive();
-const maxReview = selectedCount();
-if(state.reviewCount > maxReview) state.reviewCount = maxReview;
-
 const box = document.getElementById('globalOpts');
 let html = '';
 
-// 토글형 옵션 (사전 / 개편이벤트 / 여성1+1)
-const toggleOpts = [
-{k:'pre', t:'사전신청 할인 (과목당 1만원)', d: pre ? `~${CONFIG.settings.preDeadline}까지` : '적용 기간 종료'},
-{k:'event', t:`개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})`, d:'카페가입인사·자소서·수업신청글 작성자'},
-{k:'female11', t:'여성 비기너 1+1', d:'살사·바차타 비기너 동반(여성+여성) 1명 무료'}
-];
-toggleOpts.forEach(o=>{
-const dis = (o.k==='pre' && !pre);
-html += `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'style="opacity:.4;pointer-events:none"':''}>
-<div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
-});
+// 사전신청 할인
+const preDis = !pre;
+html += `<div class="opt ${state.pre&&pre?'on':''}" data-k="pre" ${preDis?'style="opacity:.4;pointer-events:none"':''}>
+<div><div class="t">사전신청 할인 (과목당 1만원)</div>
+<div class="d">${pre ? `~${CONFIG.settings.preDeadline}까지 · 패키지 할인과는 중복 불가, 비기너 1+1과는 중복 가능` : '적용 기간 종료'}</div></div><div class="sw"></div></div>`;
 
-// (후기 할인 카운터 UI 숨김 처리 — 계산 로직은 reviewCount=0 으로 자동 미적용)
+// 개편이벤트 (비기너 1+1 적용 중이면 자동 차단)
+const evtDis = beginnerActive;
+html += `<div class="opt ${state.event&&!evtDis?'on':''}" data-k="event" ${evtDis?'style="opacity:.4;pointer-events:none"':''}>
+<div><div class="t">개편이벤트 (인당 ${fmt(CONFIG.settings.eventAmount)})</div>
+<div class="d">${evtDis ? '비기너 1+1 적용 중 · 개편이벤트 중복 불가' : '카페가입인사·자소서·수업신청글 작성자 · 비기너 1+1과는 중복 불가, 패키지와는 중복 가능'}</div></div><div class="sw"></div></div>`;
+
+// 여성 비기너 1+1 (기존 기능 유지, 이벤트만 차단)
+html += `<div class="opt ${state.female11?'on':''}" data-k="female11">
+<div><div class="t">여성 비기너 1+1</div>
+<div class="d">여성이 여성회원 동반 시 비기너 1명 무료 · 사전 가능, 이벤트 불가</div></div><div class="sw"></div></div>`;
+
+// 비기너 1+1 자동 안내 (읽기 전용)
+html += `<div class="opt" style="cursor:default;pointer-events:none">
+<div><div class="t">비기너 1+1 (자동 적용)</div>
+<div class="d">살사 비기너 + 바차타 비기너 동시 신청 시 1+1(1과목 무료) · 사전 가능, 이벤트 불가</div></div></div>`;
 
 // 패키지 안내 (읽기 전용)
 html += `<div class="opt" style="cursor:default;pointer-events:none">
 <div><div class="t">패키지 할인 (자동 적용)</div>
-<div class="d">조건 충족 시 자동 적용 · 사전할인과 중복 안 됨</div></div></div>`;
+<div class="d">올레벨·어드밴스·공연준비반 조합 시 자동 적용 · 사전할인과는 중복 불가, 개편이벤트와는 중복 가능</div></div></div>`;
 
 box.innerHTML = html;
 
-// 토글 클릭
 box.querySelectorAll('.opt[data-k]').forEach(o=>o.addEventListener('click',()=>{
 const k=o.dataset.k;
 state[k]=!state[k];
@@ -268,63 +266,76 @@ const cl = s.genre&&s.cls ? findClass(s.genre,s.cls) : null;
 return cl ? {sub:s, cl} : null;
 }).filter(Boolean);
 
+// 비기너 1+1 무료 대상 결정
+// 1) 살사 비기너 + 바차타 비기너 동시 신청 → 자동 1+1
+// 2) 아니면 '여성 비기너 1+1' 토글 → 비기너 중 최저가 무료 (기존 기능)
+const chosenBegs = chosen.filter(({cl})=> isBeginner(cl));
+const hasSalsaBeg   = chosenBegs.some(({cl})=> cl.genre==='살사');
+const hasBachataBeg = chosenBegs.some(({cl})=> cl.genre==='바차타');
+let freedCl=null, beginnerLabel='';
+if(hasSalsaBeg && hasBachataBeg){
+freedCl = chosenBegs.map(({cl})=>cl).sort((a,b)=>a.fee-b.fee)[0];
+beginnerLabel = '비기너 1+1 (살사+바차타)';
+}else if(state.female11){
+const f11 = (CONFIG.settings.female11Classes||[]);
+const cands = chosen.filter(({cl})=> f11.includes(cl.name)).map(({cl})=>cl).sort((a,b)=>a.fee-b.fee);
+if(cands.length){ freedCl=cands[0]; beginnerLabel='여성 비기너 1+1'; }
+}
+const beginnerActive = !!freedCl;
+const beginnerOff = freedCl ? freedCl.fee : 0;
+
+// 과목 합산 + 사전할인 (무료 대상 비기너는 사전할인 제외)
 let subtotal=0, preTotal=0;
 chosen.forEach(({cl})=>{
 subtotal += cl.fee;
+if(cl===freedCl) return; // 무료 과목엔 사전할인 미적용
 if(state.pre && preActive() && cl.preDiscount>0) preTotal += cl.preDiscount;
 });
 
-const eventOff = state.event ? CONFIG.settings.eventAmount : 0;
+// 개편이벤트: 비기너 1+1 적용 중이면 차단
+const eventOff = (state.event && !beginnerActive) ? CONFIG.settings.eventAmount : 0;
 
-// 후기 할인: 개수 × 단가 (과목 수를 상한으로 clamp)
-const reviewCount = Math.min(state.reviewCount, chosen.length);
-const reviewOff = reviewCount * CONFIG.settings.reviewAmount;
-
-let female11Off=0, female11Label='';
-if(state.female11){
-const begs = chosen.filter(({cl})=> CONFIG.settings.female11Classes.includes(cl.name))
-.map(({cl})=> subjectNet(cl)).sort((a,b)=>a-b);
-if(begs.length){ female11Off = begs[0]; female11Label='비기너 1+1 (1명 무료)'; }
-}
-
+// 패키지 (사전할인과 중복 불가 / 개편이벤트와는 중복 가능)
 const keys = chosen.map(({sub})=>({genre:sub.genre, cls:sub.cls}));
 const pkg = detectPackages(keys);
 let pkgOff = pkg.total;
 let pkgLabels = pkg.labels.slice();
 
-// 패키지에 사용된 과목만 사전할인에서 제외 (패키지+사전 중복 방지),
-// 패키지에 안 묶인 과목은 사전할인 그대로 적용
+// 패키지에 사용된 과목만 사전할인에서 제외
 if(pkgOff > 0 && preTotal > 0){
 chosen.forEach(({sub, cl})=>{
 const inPkg = pkg.usedKeys.some(k => k.genre===sub.genre && k.cls===cl.name);
-if(inPkg && state.pre && preActive() && cl.preDiscount>0){
+if(inPkg && cl!==freedCl && state.pre && preActive() && cl.preDiscount>0){
 preTotal -= cl.preDiscount;
 }
 });
 if(preTotal < 0) preTotal = 0;
 }
 
-const total = Math.max(0, subtotal - preTotal - eventOff - reviewOff - female11Off - pkgOff);
-return {chosen, subtotal, preTotal, eventOff, reviewCount, reviewOff, female11Off, female11Label, pkgOff, pkgLabels, total};
+const total = Math.max(0, subtotal - preTotal - eventOff - beginnerOff - pkgOff);
+return {chosen, subtotal, preTotal, eventOff, beginnerOff, beginnerLabel, beginnerActive, pkgOff, pkgLabels, total};
 }
 
 /* ---------- 렌더 ---------- */
 function render(){
-renderSubjects(); renderGlobal();
 const r = calc();
+renderSubjects();
+renderGlobal(r.beginnerActive);
+
 const lines=[];
 lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
 if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
 if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
-if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
+if(r.beginnerOff) lines.push(`<div class="sline disc"><span>${r.beginnerLabel}</span><span>-${fmt(r.beginnerOff)}</span></div>`);
 if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
 document.getElementById('breakdown').innerHTML = lines.join('');
 document.getElementById('grandTotal').textContent = fmt(r.total);
 
-if(r.pkgLabels.length){
-document.getElementById('breakdown').insertAdjacentHTML('beforeend',
-`<div class="note">✓ ${r.pkgLabels.join(', ')} 적용됨 · 패키지 할인은 사전할인과 중복되지 않습니다.</div>`);
-}
+const notes=[];
+if(r.beginnerActive) notes.push(`✓ ${r.beginnerLabel} 적용됨 · 사전할인은 적용되지만 개편이벤트와는 중복되지 않습니다.`);
+if(r.pkgLabels.length) notes.push(`✓ ${r.pkgLabels.join(', ')} 적용됨 · 패키지 할인은 사전할인과 중복되지 않습니다.`);
+if(notes.length) document.getElementById('breakdown').insertAdjacentHTML('beforeend',
+notes.map(n=>`<div class="note">${n}</div>`).join(''));
 
 const cf = conflicts();
 document.getElementById('conflictWarn').textContent = cf.length ? '⚠ 수업시간이 겹칩니다: '+cf.join(', ') : '';
@@ -340,7 +351,7 @@ const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
 const discs=[];
 if(r.preTotal)discs.push('사전');
 if(r.eventOff)discs.push('개편이벤트');
-if(r.female11Off)discs.push('1+1');
+if(r.beginnerOff)discs.push('비기너1+1');
 if(r.pkgLabels.length)discs.push('패키지');
 const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
 fetch(WEBAPP_URL, {method:'POST', mode:'no-cors',
@@ -356,7 +367,7 @@ setTimeout(()=>t.classList.remove('show'),2200);
 
 function reset(){
 state.subjects = Array.from({length:NUM_SUBJECTS},()=>({genre:'',cls:''}));
-state.pre=false; state.event=false; state.reviewCount=0; state.female11=false;
+state.pre=false; state.event=false; state.female11=false;
 document.getElementById('nickname').value='';
 render();
 }
