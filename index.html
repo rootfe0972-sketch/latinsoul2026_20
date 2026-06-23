@@ -244,13 +244,7 @@ const k=o.dataset.k;
 state[k]=!state[k];
 render();
 }));
-// 후기 +/- 클릭
-box.querySelectorAll('button[data-act]').forEach(b=>b.addEventListener('click',(e)=>{
-e.stopPropagation();
-const act=b.dataset.act;
-const max=selectedCount();
-if(act==='review-plus' && state.reviewCount<max) state.reviewCount++;
-if(act==='review-minus' && state.reviewCount>0) state.reviewCount--;
+
 render();
 }));
 }
