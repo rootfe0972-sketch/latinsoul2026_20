@@ -219,17 +219,7 @@ html += `<div class="opt ${state[o.k]&&!dis?'on':''}" data-k="${o.k}" ${dis?'sty
 <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="sw"></div></div>`;
 });
 
-// 후기 할인 (개수 카운터)
-const minusDis = state.reviewCount<=0 ? 'disabled' : '';
-const plusDis = state.reviewCount>=maxReview ? 'disabled' : '';
-html += `<div class="opt" style="cursor:default">
-<div><div class="t">후기 할인 (수업당 ${fmt(CONFIG.settings.reviewAmount)})</div>
-<div class="d">전 차수 수업 후기를 작성하셨을 경우 수업당 ${fmt(CONFIG.settings.reviewAmount)} 할인 적용됩니다.</div></div>
-<div class="counter">
-<button type="button" data-act="review-minus" ${minusDis}>−</button>
-<span class="cnt">${state.reviewCount}</span>
-<button type="button" data-act="review-plus" ${plusDis}>+</button>
-</div></div>`;
+// (후기 할인 카운터 UI 숨김 처리 — 계산 로직은 reviewCount=0 으로 자동 미적용)
 
 // 패키지 안내 (읽기 전용)
 html += `<div class="opt" style="cursor:default;pointer-events:none">
@@ -242,15 +232,6 @@ box.innerHTML = html;
 box.querySelectorAll('.opt[data-k]').forEach(o=>o.addEventListener('click',()=>{
 const k=o.dataset.k;
 state[k]=!state[k];
-render();
-}));
-// 후기 +/- 클릭
-box.querySelectorAll('button[data-act]').forEach(b=>b.addEventListener('click',(e)=>{
-e.stopPropagation();
-const act=b.dataset.act;
-const max=selectedCount();
-if(act==='review-plus' && state.reviewCount<max) state.reviewCount++;
-if(act==='review-minus' && state.reviewCount>0) state.reviewCount--;
 render();
 }));
 }
@@ -335,7 +316,6 @@ const lines=[];
 lines.push(`<div class="sline"><span>과목 합산</span><span>${fmt(r.subtotal)}</span></div>`);
 if(r.preTotal) lines.push(`<div class="sline disc"><span>사전신청 할인</span><span>-${fmt(r.preTotal)}</span></div>`);
 if(r.eventOff) lines.push(`<div class="sline disc"><span>개편이벤트</span><span>-${fmt(r.eventOff)}</span></div>`);
-if(r.reviewOff) lines.push(`<div class="sline disc"><span>후기 할인 (${r.reviewCount}건)</span><span>-${fmt(r.reviewOff)}</span></div>`);
 if(r.female11Off) lines.push(`<div class="sline disc"><span>${r.female11Label}</span><span>-${fmt(r.female11Off)}</span></div>`);
 if(r.pkgOff) lines.push(`<div class="sline disc"><span>패키지 할인</span><span>-${fmt(r.pkgOff)}</span></div>`);
 document.getElementById('breakdown').innerHTML = lines.join('');
@@ -360,7 +340,6 @@ const items = r.chosen.map(({sub,cl})=>`${sub.genre} ${cl.name}`).join(', ');
 const discs=[];
 if(r.preTotal)discs.push('사전');
 if(r.eventOff)discs.push('개편이벤트');
-if(r.reviewOff)discs.push(`후기${r.reviewCount}`);
 if(r.female11Off)discs.push('1+1');
 if(r.pkgLabels.length)discs.push('패키지');
 const payload = {nickname:nick, items, discounts:discs.join('/'), subtotal:r.subtotal, total:r.total};
